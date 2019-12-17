@@ -12,8 +12,8 @@ import (
 // AdapterHCLog implements the hclog interface, and wraps it
 // around a Logrus entry
 type AdapterHCLog struct {
-	Log  FieldLogger
-	name string
+	Log    FieldLogger
+	MyName string
 }
 
 // HCLog has one more level than we do. As such, we will never
@@ -74,13 +74,13 @@ func (a *AdapterHCLog) ImpliedArgs() []interface{} {
 }
 
 func (a *AdapterHCLog) Name() string {
-	return a.name
+	return a.MyName
 }
 
 func (a *AdapterHCLog) Named(name string) hclog.Logger {
 	var newName bytes.Buffer
-	if a.name != "" {
-		newName.WriteString(a.name)
+	if a.MyName != "" {
+		newName.WriteString(a.MyName)
 		newName.WriteString(".")
 	}
 	newName.WriteString(name)
@@ -91,7 +91,7 @@ func (a *AdapterHCLog) Named(name string) hclog.Logger {
 func (a *AdapterHCLog) ResetNamed(name string) hclog.Logger {
 	fields := []interface{}{"subsystem_name", name}
 	e := a.CreateEntry(fields)
-	return &AdapterHCLog{Log: e, name: name}
+	return &AdapterHCLog{Log: e, MyName: name}
 }
 
 // StandardLogger is meant to return a stdlib Logger type which wraps around
