@@ -1,4 +1,4 @@
-module github.com/sirupsen/logrus
+module github.com/jkassis/logrus
 
 require (
 	github.com/hashicorp/go-hclog v0.10.0
