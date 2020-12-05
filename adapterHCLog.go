@@ -12,8 +12,8 @@ import (
 // AdapterHCLog implements the hclog interface, and wraps it
 // around a Logrus entry
 type AdapterHCLog struct {
-	fieldLogger FieldLogger
-	MyName      string
+	MyLogger FieldLogger
+	MyName   string
 }
 
 // HCLog has one more level than we do. As such, we will never
@@ -66,7 +66,7 @@ func (a *AdapterHCLog) SetLevel(hclog.Level) {
 
 func (a *AdapterHCLog) With(args ...interface{}) hclog.Logger {
 	e := a.CreateEntry(args)
-	return &AdapterHCLog{fieldLogger: e}
+	return &AdapterHCLog{MyLogger: e}
 }
 
 func (a *AdapterHCLog) ImpliedArgs() []interface{} {
@@ -91,7 +91,7 @@ func (a *AdapterHCLog) Named(name string) hclog.Logger {
 func (a *AdapterHCLog) ResetNamed(name string) hclog.Logger {
 	fields := []interface{}{"subsystem_name", name}
 	e := a.CreateEntry(fields)
-	return &AdapterHCLog{fieldLogger: e, MyName: name}
+	return &AdapterHCLog{MyLogger: e, MyName: name}
 }
 
 // StandardLogger is meant to return a stdlib Logger type which wraps around
@@ -105,13 +105,13 @@ func (a *AdapterHCLog) ResetNamed(name string) hclog.Logger {
 //
 // Apologies to those who find themselves here.
 func (a *AdapterHCLog) StandardLogger(opts *hclog.StandardLoggerOptions) *log.Logger {
-	entry := a.fieldLogger.WithFields(Fields{})
+	entry := a.MyLogger.WithFields(Fields{})
 	return log.New(entry.WriterLevel(InfoLevel), "", 0)
 }
 
 func (a *AdapterHCLog) StandardWriter(opts *hclog.StandardLoggerOptions) io.Writer {
 	var w io.Writer
-	logger, ok := a.fieldLogger.(*Logger)
+	logger, ok := a.MyLogger.(*Logger)
 	if ok {
 		w = logger.Out
 	}
@@ -122,7 +122,7 @@ func (a *AdapterHCLog) StandardWriter(opts *hclog.StandardLoggerOptions) io.Writ
 }
 
 func (a *AdapterHCLog) shouldEmit(level Level) bool {
-	currentLevel := a.fieldLogger.WithFields(Fields{}).Level
+	currentLevel := a.MyLogger.WithFields(Fields{}).Level
 	if currentLevel >= level {
 		return true
 	}
@@ -144,7 +144,7 @@ func (a *AdapterHCLog) CreateEntry(args []interface{}) *Entry {
 		fields[k] = v
 	}
 
-	return a.fieldLogger.WithFields(fields)
+	return a.MyLogger.WithFields(fields)
 }
 
 func (a *AdapterHCLog) Log(level hclog.Level, msg string, args ...interface{}) {
